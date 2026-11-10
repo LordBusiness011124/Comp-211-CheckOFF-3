@@ -1,0 +1,55 @@
+Hello my name is noah stiggins and I am a student studying computer science. i am working on a class project for my comp 211 Systems fundamentals class iin which we use C to understand different concepts. In our project the goal is to demostrate learning with AI. So we choose a topic and after learning by using ai to elevate our knowledge and understanding on a particular topic. My chosen topic is Integer Overflows and Memory Safety. We have briefly mentioned that a stack buffer over flow occurs when improper memory work is implemented, but really havent had the oppirtunity to explore it mroe. Our deliverables are three things a pressentaion, Video Submission of our presentation, Git Repository with code samples and walk throughs, and Written AI Exploration and Reflection. The presentaiton will be 5-7 min long with 3 min of q and a. what are some key concepts you think i should include in my presentation
+
+    
+    Noah, I’d build your presentation around one question: **How can an integer calculation cause a program to access memory it doesn’t own?** That gives you a clear connection between integer overflows and memory safety without trying to cover too much in 5–7 minutes.
+    
+    These are the key concepts I’d include, in this order:
+    
+    | Topic | What to explain | Time |
+    |---|---|---|
+    | **1. Integers have limits** | C integer types have a fixed number of bits, so they can represent only a limited range of values. | 45 sec |
+    | **2. What happens at the limit** | Unsigned arithmetic wraps around. Signed integer overflow is **undefined behavior**—C does not guarantee that it wraps. | 60 sec |
+    | **3. How overflow leads to memory errors** | A calculation for an allocation size can overflow, producing a buffer smaller than the program expects. | 90 sec |
+    | **4. What a buffer overflow is** | A write past the end of an array can corrupt nearby memory. A stack buffer overflow specifically involves a buffer stored on the stack. | 60 sec |
+    | **5. How to prevent and detect problems** | Check arithmetic before performing it, enforce array bounds, and use compiler warnings and sanitizers. | 60 sec |
+    | **6. What you learned using AI** | Show an initial misconception, how you investigated it with AI, and how you verified the explanation through code. | 45 sec |
+    
+    That comes to about six minutes.
+    
+    **Make the distinction between the two kinds of overflow explicit.** An *integer overflow* concerns a number’s representable range. A *buffer overflow* concerns accessing memory beyond a buffer’s boundaries. They are different problems, but an integer overflow can cause a buffer overflow.
+    
+    For your main demonstration, use this chain:
+    
+    **Requested element count → size calculation overflows → allocation is too small → later writes exceed the allocation.**
+    
+    One useful C example to discuss is:
+    
+    ```c
+    size_t bytes = count * sizeof(int);
+    int *values = malloc(bytes);
+    ```
+    
+    The multiplication can wrap if `count` is sufficiently large. The check must happen **before** the multiplication:
+    
+    ```c
+    if (count > SIZE_MAX / sizeof(int)) {
+        /* Reject the request: the size would overflow. */
+    }
+    ```
+    
+    For the repository, three small examples would support your talk well:
+    
+    - **Unsigned wraparound:** print `UINT_MAX`, then show what happens when you add `1u`.
+    - **A buffer boundary violation:** use a small array and demonstrate an out-of-bounds write with AddressSanitizer.
+    - **Unsafe versus checked allocation arithmetic:** show the bug and explain the guard that prevents it.
+    
+    Keep the arithmetic demonstration separate from any enormous allocation so it is easy to run and understand.
+    
+    For the AI exploration and reflection, a particularly good question is: **“Does signed integer overflow in C always wrap around?”** Record the answer, test your assumptions, and verify against a reliable C reference. A single observed result does not establish what C guarantees—that is a valuable learning point itself.
+    
+    Your strongest takeaway could be: **Memory safety starts before you access memory: the calculations that determine buffer sizes must also be correct.**
+    
+    
+    
+    
+    
