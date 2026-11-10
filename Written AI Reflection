@@ -1,0 +1,8 @@
+I approach this topic by using my previous knowledge involving buffer overflows, classwork revolving around integers and C, and how combining these can lead to memory allocation errors. I utilized artificial intelligence by providing my background and goals, then using it as a way to understand the material as I clarified my knowledge and asked for examples with visuals so I could better understand the topics.
+
+For example, right here I gave it my current assumptions, asked it to clarify, and then further tried to engage my knowledge by testing what I knew:
+
+"how would allocating a smaller amount of space for the particular data set corrupt neighboring memory?? I would have thorught that it just means you can't access anythign outside of the memory box and the neighboriung memory is just allocated where there is freee space. Pleas ehsow me an example of the way it can corrupt neighboring memory. Just to clarify when you allocate the space with malloc based off the count and size of int and an overflow occurs, the propgram can still try and write memory to the space that hasnt been allocated correctly? What happens when it attempts?"
+
+
+In the future, I probably would have spent more time before beginning to work on the presentation working with more practical examples and actually coding this part. However, to understand the higher-level concepts, I believe the way I utilized artificial intelligence was adequate and useful for our goals. For long-term understanding, though, it would be important for me to sit down and spend time practicing, learning, and failing, trying to create this potential vulnerability so that I can understand how to avoid it in my future code.
