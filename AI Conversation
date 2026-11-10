@@ -1,55 +1,544 @@
+Prompt #1:
+
 Hello my name is noah stiggins and I am a student studying computer science. i am working on a class project for my comp 211 Systems fundamentals class iin which we use C to understand different concepts. In our project the goal is to demostrate learning with AI. So we choose a topic and after learning by using ai to elevate our knowledge and understanding on a particular topic. My chosen topic is Integer Overflows and Memory Safety. We have briefly mentioned that a stack buffer over flow occurs when improper memory work is implemented, but really havent had the oppirtunity to explore it mroe. Our deliverables are three things a pressentaion, Video Submission of our presentation, Git Repository with code samples and walk throughs, and Written AI Exploration and Reflection. The presentaiton will be 5-7 min long with 3 min of q and a. what are some key concepts you think i should include in my presentation
 
+Reponse #1
+
+        Noah, I’d build your presentation around one question: **How can an integer calculation cause a program to access memory it doesn’t own?** That gives you a clear connection between integer overflows and memory safety without trying to cover too much in 5–7 minutes.
+        
+        These are the key concepts I’d include, in this order:
+        
+        | Topic | What to explain | Time |
+        |---|---|---|
+        | **1. Integers have limits** | C integer types have a fixed number of bits, so they can represent only a limited range of values. | 45 sec |
+        | **2. What happens at the limit** | Unsigned arithmetic wraps around. Signed integer overflow is **undefined behavior**—C does not guarantee that it wraps. | 60 sec |
+        | **3. How overflow leads to memory errors** | A calculation for an allocation size can overflow, producing a buffer smaller than the program expects. | 90 sec |
+        | **4. What a buffer overflow is** | A write past the end of an array can corrupt nearby memory. A stack buffer overflow specifically involves a buffer stored on the stack. | 60 sec |
+        | **5. How to prevent and detect problems** | Check arithmetic before performing it, enforce array bounds, and use compiler warnings and sanitizers. | 60 sec |
+        | **6. What you learned using AI** | Show an initial misconception, how you investigated it with AI, and how you verified the explanation through code. | 45 sec |
+        
+        That comes to about six minutes.
+        
+        **Make the distinction between the two kinds of overflow explicit.** An *integer overflow* concerns a number’s representable range. A *buffer overflow* concerns accessing memory beyond a buffer’s boundaries. They are different problems, but an integer overflow can cause a buffer overflow.
+        
+        For your main demonstration, use this chain:
+        
+        **Requested element count → size calculation overflows → allocation is too small → later writes exceed the allocation.**
+        
+        One useful C example to discuss is:
+        
+        ```c
+        size_t bytes = count * sizeof(int);
+        int *values = malloc(bytes);
+        ```
+        
+        The multiplication can wrap if `count` is sufficiently large. The check must happen **before** the multiplication:
+        
+        ```c
+        if (count > SIZE_MAX / sizeof(int)) {
+            /* Reject the request: the size would overflow. */
+        }
+        ```
+        
+        For the repository, three small examples would support your talk well:
+        
+        - **Unsigned wraparound:** print `UINT_MAX`, then show what happens when you add `1u`.
+        - **A buffer boundary violation:** use a small array and demonstrate an out-of-bounds write with AddressSanitizer.
+        - **Unsafe versus checked allocation arithmetic:** show the bug and explain the guard that prevents it.
+        
+        Keep the arithmetic demonstration separate from any enormous allocation so it is easy to run and understand.
+        
+        For the AI exploration and reflection, a particularly good question is: **“Does signed integer overflow in C always wrap around?”** Record the answer, test your assumptions, and verify against a reliable C reference. A single observed result does not establish what C guarantees—that is a valuable learning point itself.
+        
+        Your strongest takeaway could be: **Memory safety starts before you access memory: the calculations that determine buffer sizes must also be correct.**
+        
     
-    Noah, I’d build your presentation around one question: **How can an integer calculation cause a program to access memory it doesn’t own?** That gives you a clear connection between integer overflows and memory safety without trying to cover too much in 5–7 minutes.
-    
-    These are the key concepts I’d include, in this order:
-    
-    | Topic | What to explain | Time |
-    |---|---|---|
-    | **1. Integers have limits** | C integer types have a fixed number of bits, so they can represent only a limited range of values. | 45 sec |
-    | **2. What happens at the limit** | Unsigned arithmetic wraps around. Signed integer overflow is **undefined behavior**—C does not guarantee that it wraps. | 60 sec |
-    | **3. How overflow leads to memory errors** | A calculation for an allocation size can overflow, producing a buffer smaller than the program expects. | 90 sec |
-    | **4. What a buffer overflow is** | A write past the end of an array can corrupt nearby memory. A stack buffer overflow specifically involves a buffer stored on the stack. | 60 sec |
-    | **5. How to prevent and detect problems** | Check arithmetic before performing it, enforce array bounds, and use compiler warnings and sanitizers. | 60 sec |
-    | **6. What you learned using AI** | Show an initial misconception, how you investigated it with AI, and how you verified the explanation through code. | 45 sec |
-    
-    That comes to about six minutes.
-    
-    **Make the distinction between the two kinds of overflow explicit.** An *integer overflow* concerns a number’s representable range. A *buffer overflow* concerns accessing memory beyond a buffer’s boundaries. They are different problems, but an integer overflow can cause a buffer overflow.
-    
-    For your main demonstration, use this chain:
-    
-    **Requested element count → size calculation overflows → allocation is too small → later writes exceed the allocation.**
-    
-    One useful C example to discuss is:
-    
-    ```c
-    size_t bytes = count * sizeof(int);
-    int *values = malloc(bytes);
-    ```
-    
-    The multiplication can wrap if `count` is sufficiently large. The check must happen **before** the multiplication:
-    
-    ```c
-    if (count > SIZE_MAX / sizeof(int)) {
-        /* Reject the request: the size would overflow. */
-    }
-    ```
-    
-    For the repository, three small examples would support your talk well:
-    
-    - **Unsigned wraparound:** print `UINT_MAX`, then show what happens when you add `1u`.
-    - **A buffer boundary violation:** use a small array and demonstrate an out-of-bounds write with AddressSanitizer.
-    - **Unsafe versus checked allocation arithmetic:** show the bug and explain the guard that prevents it.
-    
-    Keep the arithmetic demonstration separate from any enormous allocation so it is easy to run and understand.
-    
-    For the AI exploration and reflection, a particularly good question is: **“Does signed integer overflow in C always wrap around?”** Record the answer, test your assumptions, and verify against a reliable C reference. A single observed result does not establish what C guarantees—that is a valuable learning point itself.
-    
-    Your strongest takeaway could be: **Memory safety starts before you access memory: the calculations that determine buffer sizes must also be correct.**
-    
-    
-    
-    
-    
+Prompt #2
+
+What do you mean when you say wrap around? Im assuming what happens is that with unsigned integers all it does is like add another byte or something, but you can't do that with signed ebcasue it needs to remmeber the signed bit.
+
+Response #2
+
+        **Wrapping means the value cycles back to zero; the integer doesn’t gain another byte.** Both signed and unsigned integer types have a fixed size.
+        
+        Imagine an unsigned integer with only **8 bits**. It can hold values from 0 to 255:
+        
+        ```text
+            11111111    = 255
+        +          1
+        -------------
+          1 00000000    = 256 mathematically
+        ```
+        
+        The result needs 9 bits, but the integer has room for only 8. The extra bit is discarded, leaving:
+        
+        ```text
+        00000000 = 0
+        ```
+        
+        That’s **wraparound**: `255 → 0 → 1 → 2 …`
+        
+        A typical 32-bit `unsigned int` does the same thing at a larger limit: `4,294,967,295 + 1` becomes `0`.
+        
+        Your thought about signed numbers points toward their different representation, but **neither type automatically grows**. Signed integers also have a fixed size and use that space to represent positive and negative values. The key C rule is:
+        
+        - **Unsigned:** wraparound is guaranteed.
+        - **Signed:** exceeding the range is undefined behavior, so you cannot rely on a particular result.
+        
+Prompt #3
+
+so with signed wrap around does it still in a sense wrap a round it just means that it gets flipped? what's ocurring with a signed integer that causes the undefined behavior? I understand with the wrap around and correct me if im wrong but with unsigned arithmetic the same addition principles occur normally its just the next bit that's needed to represent that there was an addionation isn't there so conceptually it works but computationally it can't represent the value so it is dropped and it equals 0
+
+Response #3
+
+        Yes—your understanding of **unsigned addition is correct**. When the result needs an extra bit, only the bits that fit are retained. Adding 1 to the maximum unsigned value therefore produces 0. Other overflowing additions can produce other values: in an 8-bit unsigned type, `255 + 2` becomes `1`.
+        
+        For **signed integers**, separate what the hardware commonly does from what C guarantees.
+        
+        Consider an 8-bit signed integer using **two’s complement**, which represents values from −128 to 127:
+        
+        ```text
+        01111111 =  127
+               +1
+        ---------
+        10000000 = −128 when interpreted as signed two’s complement
+        ```
+        
+        On typical hardware, the addition produces that bit pattern. It isn’t simply flipping a sign bit: the usual binary addition carries through the bits, and the resulting pattern represents a negative number.
+        
+        **But C does not guarantee that result for signed overflow.** The mathematical answer, 128, is outside this type’s range, so C defines the operation as undefined behavior.
+        
+        Nothing physically “causes” undefined behavior inside the processor. **Undefined behavior is a rule of the C language:** once your program performs that operation, the language places no requirements on the result. The compiler may assume signed overflow never occurs when optimizing your code.
+        
+        So:
+        
+        - **Hardware:** may produce a bit pattern that looks like signed wraparound.
+        - **C:** does not let your program rely on that behavior.
+        
+        That’s why “it becomes negative” can describe an observation, but isn’t a reliable rule for signed arithmetic in C.
+
+Prompt #4
+
+so the result could be a random value the hardware just puts together? Because the hardware assumes no overflow occured does the compiler just change the math operations so that it doesn't go over?
+
+Response #4
+
+        **Neither—the hardware isn’t choosing a random value, and the compiler doesn’t change the math to keep it within range.** My earlier wording about “no guaranteed result” needs that distinction.
+        
+        On typical hardware, addition follows predictable binary rules. Adding 1 to the largest signed integer often produces the bit pattern for the most negative integer.
+        
+        **The compiler is where the “assume no signed overflow” rule matters.** It can use that assumption to simplify your code. For example:
+        
+        ```c
+        int is_greater(int x) {
+            return x + 1 > x;
+        }
+        ```
+        
+        Mathematically, adding 1 always makes a number larger. Because C lets the compiler assume signed overflow won’t occur, it may simplify this entire function to:
+        
+        ```c
+        int is_greater(int x) {
+            return 1;
+        }
+        ```
+        
+        It might **remove the addition and comparison entirely**. Calling the original function with `INT_MAX` would cause signed overflow, so C doesn’t require that case to behave as though the hardware wrapped.
+        
+        The key distinction is: **the compiler assumes your program avoids signed overflow; it doesn’t automatically prevent overflow for you.**
+
+Prompt #5
+
+So at what level of the gcc compiler does this take place can you describe it to me and make sure to use visuals
+
+Response #5
+        
+        
+        **This happens during compilation, when GCC simplifies your program—before the CPU runs it.** The main area to think about is GCC’s **middle end**, although simple expressions can also be simplified earlier.
+        
+        Here is a simplified view of the process:
+        
+        ```mermaid
+        flowchart TD
+            A["Your C code<br/>return x + 1 > x;"] --> B["Front end<br/>Reads the code and identifies types"]
+            B --> C["Middle end<br/>Analyzes and simplifies operations"]
+            C --> D["Back end<br/>Produces instructions for the CPU"]
+            D --> E["Running program<br/>CPU executes those instructions"]
+            style C fill:#fff0b3,color:#222,stroke:#987000
+        ```
+        
+        GCC uses internal representations of your code, including one called **GIMPLE**, to perform many middle-end optimizations. The exact place a simplification occurs depends on the expression and GCC version. [GCC’s explanation of its middle end](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gccint/Tree-SSA.html)
+        
+        Consider our example:
+        
+        ```c
+        int is_greater(int x) {
+            return x + 1 > x;
+        }
+        ```
+        
+        GCC’s reasoning can be pictured like this:
+        
+        ```mermaid
+        flowchart TD
+            A["Expression: x + 1 > x"] --> B["x is a signed int"]
+            B --> C["For every x where the addition is defined,<br/>x + 1 is greater than x"]
+            C --> D["The overflowing case has no required behavior"]
+            D --> E["Simplify the expression to true"]
+            E --> F["Result: return 1;"]
+        ```
+        
+        GCC documents this particular simplification as an example of an optimization based on signed overflow being undefined. [GCC warning documentation](https://gcc.gnu.org/onlinedocs/gcc-13.1.0/gcc/Warning-Options.html)
+        
+        **The CPU might therefore never perform the addition at all.** Conceptually, the generated instructions could change like this:
+        
+        ```text
+        Original idea                 After simplification
+        ─────────────                 ────────────────────
+        Read x                        Put 1 in the return register
+        Add 1                         Return
+        Compare with x
+        Return comparison result
+        ```
+        
+        That’s the missing connection: **the compiler doesn’t need to know the value of `x` to simplify this expression.** It reasons about all cases where the operation has defined behavior.
+        
+        If by “level” you mean flags such as `-O0`, `-O1`, or `-O2`, those control optimization effort; they aren’t separate compiler stages. **`-O0` does not make signed overflow defined**, and some simple simplifications can still occur.
+        
+        GCC also provides `-fwrapv`, which tells it to treat signed addition, subtraction, and multiplication as wrapping. Under that rule, this comparison cannot always become `true`: when `x` is `INT_MAX`, adding one wraps to `INT_MIN`, making the comparison false. [GCC’s `-fwrapv` documentation](https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html)
+
+
+Prompt #6
+
+ok i understand how and what happens when an unsigned or signed integer reach their own respective limits when handling arithmetic but how does their reaction to overflow lead to memory errors? how can this be exploited?
+
+Response #6
+        
+        **Overflow can make a program reserve less memory than it needs—or make an unsafe size pass a check.** Later, the program uses that incorrect number to access memory.
+        
+        The arithmetic overflow itself doesn’t overwrite memory. It creates a bad size or index that leads to an invalid memory access.
+        
+        Imagine a program accepting a user’s requested number of items:
+        
+        ```text
+        User requests items
+                ↓
+        Program calculates: count × bytes per item
+                ↓
+        Multiplication overflows → unexpectedly small result
+                ↓
+        Program allocates a small buffer
+                ↓
+        Program copies the original number of items
+                ↓
+        Writes go beyond the buffer
+        ```
+        
+        For a simplified example, suppose a size is stored in an **8-bit unsigned integer**, with a maximum of 255. Each item needs 4 bytes:
+        
+        ```text
+        Requested items:          65
+        Actual bytes needed:     65 × 4 = 260
+        
+        Stored in 8 bits:         260 wraps to 4
+        Memory allocated:        4 bytes
+        Memory needed:           260 bytes
+        ```
+        
+        That mismatch is the danger. Real allocation calculations normally use `size_t`, which is much larger, but the same principle applies at its limit.
+        
+        Here’s the vulnerable pattern in C:
+        
+        ```c
+        /* count comes from input; size_t is unsigned */
+        size_t bytes = count * sizeof(int);
+        int *items = malloc(bytes);
+        
+        if (items == NULL) {
+            return;
+        }
+        
+        for (size_t i = 0; i < count; i++) {
+            items[i] = 0;
+        }
+        ```
+        
+        If the multiplication wraps, `malloc` receives the **wrapped size**. It has no knowledge of the original intended size. The loop still uses `count`, so it can write past the allocation.
+        
+        **How could someone exploit this?** If an attacker controls the count and the data being copied, they may deliberately choose values that produce this mismatch:
+        
+        ```text
+        Attacker controls size
+                ↓
+        Triggers arithmetic overflow
+                ↓
+        Gets an undersized allocation
+                ↓
+        Supplies data written beyond its boundary
+                ↓
+        Corrupts neighboring memory
+        ```
+        
+        Possible consequences include a crash, corrupted application data, or—in some circumstances—control over program execution. The outcome depends on what memory is overwritten and the program’s protections; an overflow does not automatically grant control.
+        
+        Signed overflow can also undermine safety checks. This is unreliable:
+        
+        ```c
+        if (count + 1 > count) {
+            /* Assume adding one is safe */
+        }
+        ```
+        
+        For a signed `int`, the compiler may simplify that condition to true, as we discussed. **A check that performs the overflowing operation is already too late.**
+        
+        For allocation arithmetic, check **before multiplying**:
+        
+        ```c
+        if (count > SIZE_MAX / sizeof(int)) {
+            /* Reject: the multiplication would overflow */
+            return;
+        }
+        
+        int *items = malloc(count * sizeof(int));
+        ```
+        
+        You would also check allocation failure and impose a reasonable input limit.
+        
+        For your presentation, the central connection is: **an incorrect number becomes a memory-safety problem when the program trusts it as a buffer size, copy length, or array index.**
+        
+Prompt #7
+
+how would allocating a smaller amount of space for the particular data set corrupt neighboring memory?? I would have thorught that it just means you can't access anythign outside of the memory box and the neighboriung memory is just allocated where there is freee space. Pleas ehsow me an example of the way it can corrupt neighboring memory. Just to clarify when you allocate the space with malloc based off the count and size of int and an overflow occurs, the propgram can still try and write memory to the space that hasnt been allocated correctly? What happens when it attempts?
+
+Response #7
+        
+        **Yes—the program can still attempt those writes.** In C, `malloc` gives you a pointer to a region of memory. It does **not** automatically put a boundary check around every access through that pointer.
+        
+        Your “memory box” is a good model for **what your program is allowed to access**, but it usually isn’t a physical barrier enforced for each allocation.
+        
+        Suppose `sizeof(int)` is 4 and you allocate space for two integers:
+        
+        ```c
+        int *items = malloc(2 * sizeof(int));
+        ```
+        
+        Imagine the allocation starts at address 1000:
+        
+        ```text
+        Address        1000–1003    1004–1007    1008–1011
+                      ┌───────────┬───────────┬────────────────────┐
+        Memory        │ items[0]  │ items[1]  │ Other memory       │
+                      └───────────┴───────────┴────────────────────┘
+                      ← Your allocated space →
+        ```
+        
+        Now consider:
+        
+        ```c
+        items[2] = 99;  // Out-of-bounds write: undefined behavior
+        ```
+        
+        C calculates the address using:
+        
+        ```text
+        Starting address + index × size of each element
+        1000             + 2     × 4
+                         = 1008
+        ```
+        
+        **The pointer doesn’t carry the allocation’s length.** Without an added checking tool, this write typically becomes a CPU instruction that tries to store `99` at address 1008.
+        
+        If that address is writable, the write may succeed—and replace whatever bits were already there:
+        
+        ```text
+        Before:
+        ┌───────────┬───────────┬────────────────────┐
+        │ items[0]  │ items[1]  │ Existing contents  │
+        └───────────┴───────────┴────────────────────┘
+                                          ↓
+        After the invalid write:
+        ┌───────────┬───────────┬────────────────────┐
+        │ items[0]  │ items[1]  │ 99                 │
+        └───────────┴───────────┴────────────────────┘
+        ```
+        
+        That is **memory corruption**: replacing contents your program wasn’t entitled to change. The neighboring region could contain unused space, allocator bookkeeping, or another object. This diagram is illustrative; separate allocations aren’t guaranteed to sit next to each other.
+        
+        Here’s a safe, defined demonstration of the *addressing idea*, using one array so you can see the overwrite:
+        
+        ```c
+        #include <stdio.h>
+        
+        int main(void) {
+            int memory[3] = {10, 20, 42};
+        
+            /* Imagine only the first two slots were our buffer. */
+            int *items = memory;
+        
+            printf("Neighbor before: %d\n", memory[2]);
+        
+            items[2] = 99;
+        
+            printf("Neighbor after:  %d\n", memory[2]);
+        }
+        ```
+        
+        Output:
+        
+        ```text
+        Neighbor before: 42
+        Neighbor after:  99
+        ```
+        
+        Here the write is legal because the actual array contains three elements. With a `malloc` allocation containing only two elements, the same index would be an invalid access.
+        
+        **What happens during a real out-of-bounds write?**
+        
+        | Situation | Possible result |
+        |---|---|
+        | Address is in writable memory | Write silently changes memory |
+        | Write damages data used later | Wrong results or a later crash |
+        | Address reaches protected or unmapped memory | Operating system may stop the program, often with a segmentation fault |
+        | AddressSanitizer detects the violation | Diagnostic identifying the out-of-bounds write |
+        
+        The operating system generally protects memory in **pages**, which are larger than individual allocations. It usually doesn’t know that your particular buffer ends after eight bytes.
+        
+        So the connection to integer overflow is: **the allocation becomes too small, but the later loop still calculates and writes addresses as though the full allocation existed.**
+
+Prompt #8
+
+thank you now can you please show me with examples i can test on my own? also give me real world examples of when this has happened
+
+Response #8
+
+I created **three runnable C examples** in [overflow-lab](/Users/noah/.codex/.chatgpt-projects/g-p-6aabfffb9fac81918b0494e56b90aa3a/overflow-lab) and tested them. The memory example catches the invalid write using AddressSanitizer.
+
+**1. Watch an unsigned integer wrap**
+
+Open [wrap.c](/Users/noah/.codex/.chatgpt-projects/g-p-6aabfffb9fac81918b0494e56b90aa3a/overflow-lab/wrap.c). Its main operation is:
+
+```c
+unsigned int value = UINT_MAX;
+value += 1u;
+```
+
+From the project folder, compile and run:
+
+```sh
+cc -std=c11 -Wall -Wextra overflow-lab/wrap.c -o overflow-lab/wrap
+./overflow-lab/wrap
+```
+
+On your system, I observed:
+
+```text
+Before: 4294967295
+After:  0
+```
+
+**2. See a small allocation cause an out-of-bounds write**
+
+Open [allocation.c](/Users/noah/.codex/.chatgpt-projects/g-p-6aabfffb9fac81918b0494e56b90aa3a/overflow-lab/allocation.c).
+
+This example deliberately stores a size in `uint8_t`, an unsigned 8-bit type:
+
+```c
+const unsigned int count = 65;
+const unsigned int bytes_per_item = 4;
+
+uint8_t stored_bytes = (uint8_t)(count * bytes_per_item);
+```
+
+One important detail: **the multiplication produces 260 normally; converting that result to `uint8_t` reduces it to 4.** This is a narrowing conversion, rather than overflow during the multiplication. It creates the same dangerous allocation mismatch.
+
+```text
+65 items × 4 bytes = 260 bytes needed
+                         ↓
+                Stored size becomes 4
+                         ↓
+                  malloc(4)
+                         ↓
+              Loop tries writing 260 bytes
+```
+
+Compile with memory checking enabled:
+
+```sh
+cc -std=c11 -Wall -Wextra -g -O0 \
+  -fsanitize=address,undefined -fno-sanitize-recover=all \
+  overflow-lab/allocation.c -o overflow-lab/allocation
+```
+
+Run the deliberately broken version:
+
+```sh
+./overflow-lab/allocation bad
+```
+
+The relevant output I got was:
+
+```text
+Needed: 260 bytes; allocating: 4 bytes
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 1
+```
+
+The error occurs at the **fifth byte**, index `4`:
+
+```text
+Index:     0    1    2    3  │  4    5    ...
+          [A]  [A]  [A]  [A] │ [X]
+          Allocated bytes   │ First invalid write
+```
+
+AddressSanitizer stops the program there. Without that checking, the write might silently change other memory or cause a crash.
+
+Now run the checked version:
+
+```sh
+./overflow-lab/allocation safe
+```
+
+It checks the size **before multiplication** and prints:
+
+```text
+Rejected before multiplication: size cannot fit in uint8_t.
+```
+
+Try changing `count` from `65` to `63`, then recompile. Both modes should finish successfully because 252 fits in the size field.
+
+**3. Catch signed integer overflow**
+
+Open [signed.c](/Users/noah/.codex/.chatgpt-projects/g-p-6aabfffb9fac81918b0494e56b90aa3a/overflow-lab/signed.c). It intentionally adds one to `INT_MAX`.
+
+```sh
+cc -std=c11 -Wall -Wextra -g -O0 \
+  -fsanitize=undefined -fno-sanitize-recover=all \
+  overflow-lab/signed.c -o overflow-lab/signed
+
+./overflow-lab/signed
+```
+
+I observed:
+
+```text
+Before: 2147483647
+runtime error: signed integer overflow:
+2147483647 + 1 cannot be represented in type 'int'
+```
+
+The diagnostic comes from **UndefinedBehaviorSanitizer**, which we explicitly enabled.
+
+**Real-world examples**
+
+These are documented vulnerabilities; the advisories describe possible exploitation, not necessarily confirmed attacks in the wild.
+
+| Case | What happened |
+|---|---|
+| **Theora video decoding, 2009 — CVE-2009-3389** | Multiplying video dimensions overflowed a 32-bit integer, causing an undersized allocation. A crafted video could write beyond the buffer, potentially allowing arbitrary code execution. [Mozilla advisory](https://www.mozilla.org/en-US/security/advisories/mfsa2009-67/) |
+| **Firefox MP4 playback, 2015 — CVE-2015-7213** | An integer overflow caused a buffer to be allocated too small and then overrun, producing a potentially exploitable crash. [Mozilla advisory](https://www.mozilla.org/en-US/security/advisories/mfsa2015-146/) |
+| **Firefox structured cloning, 2021 — CVE-2021-43537** | Incorrect conversion of sizes from 64-bit to 32-bit integers allowed memory corruption and a potentially exploitable crash. This resembles the narrowing conversion in our small example. [Mozilla advisory](https://www.mozilla.org/en-US/security/advisories/mfsa2021-53/#CVE-2021-43537) |
+
+For your presentation, **the allocation demo plus the Theora case** gives you a clear connection between a small classroom example and a real vulnerability.
+
+The examples passed their intended checks using Apple Clang; the two deliberately broken runs stopped with sanitizer errors. Saving a separate session note was blocked by a local folder permission error.
